@@ -74,6 +74,7 @@ if kDAKConfig and kDAKConfig.ReservedSlots then
 	
 	local function WhoReserved(client)
 		local playerList = EntityListToTable(Shared.GetEntitiesWithClassname("Player"))
+		local player = client:GetControllingPlayer()
 
 		for r = #playerList, 1, -1 do
 			if playerList[r] ~= nil then
