@@ -72,6 +72,39 @@ if kDAKConfig and kDAKConfig.ReservedSlots then
 		end
 	end
 	
+	local function WhoReserved(client)
+		local playerList = EntityListToTable(Shared.GetEntitiesWithClassname("Player"))
+
+		for r = #playerList, 1, -1 do
+			if playerList[r] ~= nil then
+				local plyr = playerList[r]
+				local clnt = playerList[r]:GetClient()
+				if plyr ~= nil and clnt ~= nil then
+					if CheckReserveStatus(clnt, true) then
+						if reserveCount ~= nil
+							reserveCount = 0
+							chatMessage = "Players on the server with reserved slots:"
+							Server.SendNetworkMessage(player, "Chat", BuildChatMessage(false, "PM - " .. kDAKConfig.DAKLoader.MessageSender, -1, kTeamReadyRoom, kNeutralTeamType, chatMessage), true)
+						end
+						chatMessage = plyr:GetControllingPlayer().name
+						Server.SendNetworkMessage(player, "Chat", BuildChatMessage(false, "PM - " .. kDAKConfig.DAKLoader.MessageSender, -1, kTeamReadyRoom, kNeutralTeamType, chatMessage), true)
+						reserveCount = reserveCount + 1
+					end
+				end
+			end
+		end
+
+		if reserveCount == nil then
+			chatMessage = "There are no players on the server with a reserved slot"
+			Server.SendNetworkMessage(player, "Chat", BuildChatMessage(false, "PM - " .. kDAKConfig.DAKLoader.MessageSender, -1, kTeamReadyRoom, kNeutralTeamType, chatMessage), true)
+		else
+			chatMessage = string.format('%i', 100*reserveCount/table.getn(playerList))..'% of players have reserved slots'
+			Server.SendNetworkMessage(player, "Chat", BuildChatMessage(false, "PM - " .. kDAKConfig.DAKLoader.MessageSender, -1, kTeamReadyRoom, kNeutralTeamType, chatMessage), true)
+		end
+	end
+
+	DAKCreateServerAdminCommand("Console_sv_whoreserved", WhoReserved, "Will list all players with a reserved slot.")
+
 	local function ServerIsFull(playerCount)
 		local result = playerCount >= kDAKConfig.ReservedSlots.kMaximumSlots - kDAKConfig.ReservedSlots.kReservedSlots
 		return result
